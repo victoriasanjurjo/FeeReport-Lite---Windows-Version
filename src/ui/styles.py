@@ -1,6 +1,6 @@
 """
-Estilos visuales modernos y profesionales para FeeReport Lite (PySide6 / QSS).
-Paleta clara, neutra y balanceada con tipografía de alto contraste y buen espaciado.
+Estilos visuales modernos, compactos y profesionales para FeeReport Lite (PySide6 / QSS).
+Paleta clara, neutra y balanceada con tipografía de alto contraste y espaciado optimizado.
 """
 
 APP_STYLESHEET = """
@@ -11,45 +11,48 @@ QWidget {
     background-color: #F8FAFC;
     color: #1E293B;
     font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 /* ==========================================================================
-   Contenedores y Tarjetas (Cards)
+   Contenedores y Tarjetas (Cards Compactas)
    ========================================================================== */
 QGroupBox {
     background-color: #FFFFFF;
     border: 1px solid #E2E8F0;
-    border-radius: 8px;
-    margin-top: 14px;
-    padding-top: 18px;
-    padding-bottom: 12px;
-    padding-left: 12px;
-    padding-right: 12px;
+    border-radius: 6px;
+    margin-top: 10px;
+    padding-top: 12px;
+    padding-bottom: 6px;
+    padding-left: 10px;
+    padding-right: 10px;
     font-weight: 600;
+    font-size: 12px;
     color: #0F172A;
 }
 
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    left: 14px;
-    padding: 0 6px;
+    left: 10px;
+    padding: 0 4px;
     background-color: #FFFFFF;
     color: #1E293B;
 }
 
 /* ==========================================================================
-   Campos de Texto y Entradas
+   Campos de Texto y Entradas Compactos
    ========================================================================== */
 QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
     background-color: #FFFFFF;
     border: 1px solid #CBD5E1;
-    border-radius: 6px;
-    padding: 7px 10px;
+    border-radius: 4px;
+    padding: 4px 8px;
     color: #0F172A;
+    font-size: 12px;
     selection-background-color: #2563EB;
     selection-color: #FFFFFF;
+    min-height: 22px;
 }
 
 QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
@@ -70,9 +73,10 @@ QPushButton {
     background-color: #F1F5F9;
     color: #334155;
     border: 1px solid #CBD5E1;
-    border-radius: 6px;
-    padding: 8px 14px;
+    border-radius: 5px;
+    padding: 5px 12px;
     font-weight: 600;
+    font-size: 12px;
 }
 
 QPushButton:hover {
@@ -90,8 +94,9 @@ QPushButton#btnPrimary {
     background-color: #0F172A;
     color: #FFFFFF;
     border: 1px solid #0F172A;
-    font-size: 14px;
-    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 8px 18px;
 }
 
 QPushButton#btnPrimary:hover {
@@ -103,13 +108,13 @@ QPushButton#btnPrimary:pressed {
     background-color: #334155;
 }
 
-/* Botón de Éxito / Acción Destacada */
+/* Botón de Éxito / Agregar Ítem */
 QPushButton#btnSuccess {
     background-color: #059669;
     color: #FFFFFF;
     border: 1px solid #047857;
-    font-size: 13px;
-    padding: 8px 14px;
+    font-size: 12px;
+    padding: 5px 12px;
 }
 
 QPushButton#btnSuccess:hover {
@@ -121,6 +126,7 @@ QPushButton#btnDanger {
     background-color: #FEE2E2;
     color: #DC2626;
     border: 1px solid #FECACA;
+    padding: 5px 12px;
 }
 
 QPushButton#btnDanger:hover {
@@ -128,13 +134,27 @@ QPushButton#btnDanger:hover {
     color: #991B1B;
 }
 
+/* Botón discreto / secundario de tarjeta */
+QPushButton#btnSubtle {
+    background-color: transparent;
+    color: #2563EB;
+    border: 1px dashed #93C5FD;
+    padding: 3px 8px;
+    font-size: 11px;
+}
+
+QPushButton#btnSubtle:hover {
+    background-color: #EFF6FF;
+    border-color: #3B82F6;
+}
+
 /* ==========================================================================
-   Tabla de Ítems
+   Tabla de Ítems (Visualmente Destacada y con Altura Amplia)
    ========================================================================== */
 QTableWidget {
     background-color: #FFFFFF;
     alternate-background-color: #F8FAFC;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #CBD5E1;
     border-radius: 6px;
     gridline-color: #E2E8F0;
     selection-background-color: #EFF6FF;
@@ -146,7 +166,7 @@ QHeaderView::section {
     color: #FFFFFF;
     font-weight: 600;
     font-size: 12px;
-    padding: 8px 6px;
+    padding: 6px 8px;
     border: none;
     border-right: 1px solid #334155;
 }
@@ -166,24 +186,28 @@ QLabel#lblFieldTitle {
     font-size: 11px;
     font-weight: 600;
     color: #64748B;
-    text-transform: uppercase;
 }
 
 QLabel#lblTotalFinal {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: #0F172A;
 }
 
 QLabel#lblSubtotal {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: #334155;
 }
 
 /* ==========================================================================
-   Barras de Scroll
+   Scroll Area y Barras de Scroll
    ========================================================================== */
+QScrollArea {
+    border: none;
+    background-color: transparent;
+}
+
 QScrollBar:vertical {
     border: none;
     background-color: #F1F5F9;

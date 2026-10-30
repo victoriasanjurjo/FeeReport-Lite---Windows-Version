@@ -1,6 +1,6 @@
 """
 Ventana Principal de FeeReport Lite.
-Interfaz reactiva, moderna y limpia construida con PySide6.
+Diseño moderno, limpio y ultra compacto con foco en la tabla de ítems presupuestados.
 """
 import os
 import sys
@@ -9,8 +9,8 @@ from datetime import date
 from pathlib import Path
 from typing import List
 
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QIcon, QFont, QDoubleValidator
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -29,7 +29,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QCheckBox,
     QMessageBox,
-    QFileDialog,
+    QScrollArea,
     QAbstractItemView,
 )
 
@@ -39,7 +39,7 @@ from ..models.presupuesto import ItemPresupuesto, Presupuesto
 from ..services.config_service import ConfigService
 from ..services.pdf_generator import PDFGeneratorService
 from ..utils.paths import get_app_icon_path, get_outputs_dir
-from ..utils.formatters import format_currency, format_percent
+from ..utils.formatters import format_currency
 
 
 class MainWindow(QMainWindow):
@@ -48,8 +48,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("FeeReport Lite • Generador de Presupuestos")
-        self.resize(1020, 780)
-        self.setMinimumSize(880, 640)
+        self.resize(1020, 720)
+        self.setMinimumSize(820, 500)
 
         # Servicios
         self.config_service = ConfigService()
@@ -66,120 +66,148 @@ class MainWindow(QMainWindow):
         self._recalculate_all()
 
     def _init_ui(self):
-        """Construye la jerarquía visual de la aplicación."""
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(14)
+        """Construye la jerarquía visual de la aplicación optimizada para pantallas de cualquier resolución."""
+        # Scroll area contenedor principal para garantizar accesibilidad en pantallas de menor altura
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        self.setCentralWidget(scroll)
 
-        # 1. Panel de Formularios (Profesional y Cliente en paralelo)
+        content_widget = QWidget()
+        scroll.setWidget(content_widget)
+
+        main_layout = QVBoxLayout(content_widget)
+        main_layout.setContentsMargins(14, 10, 14, 10)
+        main_layout.setSpacing(8)
+
+        # 1. Panel de Formularios Compactos (Profesional y Cliente en paralelo)
         forms_layout = QHBoxLayout()
-        forms_layout.setSpacing(16)
+        forms_layout.setSpacing(10)
         forms_layout.addWidget(self._create_professional_group(), stretch=1)
         forms_layout.addWidget(self._create_client_group(), stretch=1)
-        main_layout.addLayout(forms_layout)
+        main_layout.addLayout(forms_layout, stretch=0)
 
-        # 2. Panel de Ítems Presupuestados (Tabla interactiva)
+        # 2. Panel de Ítems Presupuestados (Prioridad de espacio y altura garantizada)
         main_layout.addWidget(self._create_items_group(), stretch=1)
 
-        # 3. Panel Inferior: Opciones Financieras y Resumen de Totales
+        # 3. Panel Inferior Compacto: Opciones Financieras y Resumen de Totales
         bottom_layout = QHBoxLayout()
-        bottom_layout.setSpacing(16)
+        bottom_layout.setSpacing(10)
         bottom_layout.addWidget(self._create_options_group(), stretch=1)
         bottom_layout.addWidget(self._create_summary_group(), stretch=1)
-        main_layout.addLayout(bottom_layout)
+        main_layout.addLayout(bottom_layout, stretch=0)
 
         # 4. Barra de Acciones Globales
-        main_layout.addLayout(self._create_actions_bar())
+        main_layout.addLayout(self._create_actions_bar(), stretch=0)
 
     def _create_professional_group(self) -> QGroupBox:
-        """Crea la tarjeta de datos del emisor (Profesional)."""
+        """Crea la tarjeta compacta de datos del emisor (Profesional) en 2 columnas."""
         box = QGroupBox("Datos del Profesional (Emisor)")
         layout = QGridLayout(box)
-        layout.setVerticalSpacing(8)
-        layout.setHorizontalSpacing(10)
+        layout.setVerticalSpacing(4)
+        layout.setHorizontalSpacing(8)
+        layout.setContentsMargins(8, 8, 8, 6)
 
+        # Fila 0: Nombre y Apellido
         lbl_nombre = QLabel("Nombre:")
         self.txt_prof_nombre = QLineEdit()
-        self.txt_prof_nombre.setPlaceholderText("Ej. Juan")
+        self.txt_prof_nombre.setPlaceholderText("Nombre...")
 
         lbl_apellido = QLabel("Apellido:")
         self.txt_prof_apellido = QLineEdit()
-        self.txt_prof_apellido.setPlaceholderText("Ej. Pérez")
-
-        lbl_tel = QLabel("Teléfono de contacto:")
-        self.txt_prof_tel = QLineEdit()
-        self.txt_prof_tel.setPlaceholderText("Ej. +54 9 11 1234-5678")
-
-        lbl_esp = QLabel("Título / Especialidad:")
-        self.txt_prof_titulo = QLineEdit()
-        self.txt_prof_titulo.setPlaceholderText("Ej. Desarrollador de Software")
-
-        btn_save_prof = QPushButton("💾 Guardar como mis datos por defecto")
-        btn_save_prof.setToolTip("Guarda estos datos para autocompletarlos automáticamente en cada inicio")
-        btn_save_prof.clicked.connect(self._save_professional_data)
+        self.txt_prof_apellido.setPlaceholderText("Apellido...")
 
         layout.addWidget(lbl_nombre, 0, 0)
         layout.addWidget(self.txt_prof_nombre, 0, 1)
-        layout.addWidget(lbl_apellido, 1, 0)
-        layout.addWidget(self.txt_prof_apellido, 1, 1)
-        layout.addWidget(lbl_tel, 2, 0)
-        layout.addWidget(self.txt_prof_tel, 2, 1)
-        layout.addWidget(lbl_esp, 3, 0)
-        layout.addWidget(self.txt_prof_titulo, 3, 1)
-        layout.addWidget(btn_save_prof, 4, 0, 1, 2)
+        layout.addWidget(lbl_apellido, 0, 2)
+        layout.addWidget(self.txt_prof_apellido, 0, 3)
+
+        # Fila 1: Teléfono y Título/Especialidad
+        lbl_tel = QLabel("Teléfono:")
+        self.txt_prof_tel = QLineEdit()
+        self.txt_prof_tel.setPlaceholderText("Teléfono...")
+
+        lbl_esp = QLabel("Título/Especialidad:")
+        self.txt_prof_titulo = QLineEdit()
+        self.txt_prof_titulo.setPlaceholderText("Ej. Servicios Profesionales")
+
+        layout.addWidget(lbl_tel, 1, 0)
+        layout.addWidget(self.txt_prof_tel, 1, 1)
+        layout.addWidget(lbl_esp, 1, 2)
+        layout.addWidget(self.txt_prof_titulo, 1, 3)
+
+        # Fila 2: Botón de guardado rápido alineado
+        btn_save_prof = QPushButton("💾 Guardar mis datos por defecto")
+        btn_save_prof.setObjectName("btnSubtle")
+        btn_save_prof.setToolTip("Guarda estos datos para no reingresarlos en futuras sesiones")
+        btn_save_prof.clicked.connect(self._save_professional_data)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        btn_row.addWidget(btn_save_prof)
+        layout.addLayout(btn_row, 2, 0, 1, 4)
 
         return box
 
     def _create_client_group(self) -> QGroupBox:
-        """Crea la tarjeta de datos del receptor (Cliente)."""
+        """Crea la tarjeta compacta de datos del receptor (Cliente) en 2 columnas."""
         box = QGroupBox("Datos del Cliente (Receptor)")
         layout = QGridLayout(box)
-        layout.setVerticalSpacing(8)
-        layout.setHorizontalSpacing(10)
+        layout.setVerticalSpacing(4)
+        layout.setHorizontalSpacing(8)
+        layout.setContentsMargins(8, 8, 8, 6)
 
+        # Fila 0: Nombre y Apellido
         lbl_nombre = QLabel("Nombre:")
         self.txt_cli_nombre = QLineEdit()
-        self.txt_cli_nombre.setPlaceholderText("Ej. María")
+        self.txt_cli_nombre.setPlaceholderText("Nombre del cliente...")
 
         lbl_apellido = QLabel("Apellido:")
         self.txt_cli_apellido = QLineEdit()
-        self.txt_cli_apellido.setPlaceholderText("Ej. González")
-
-        lbl_tel = QLabel("Teléfono de contacto:")
-        self.txt_cli_tel = QLineEdit()
-        self.txt_cli_tel.setPlaceholderText("Ej. +54 9 11 9876-5432")
-
-        lbl_email = QLabel("Email de contacto:")
-        self.txt_cli_email = QLineEdit()
-        self.txt_cli_email.setPlaceholderText("Ej. cliente@empresa.com")
-
-        btn_clear_client = QPushButton("🧹 Limpiar campos del cliente")
-        btn_clear_client.clicked.connect(self._clear_client_fields)
+        self.txt_cli_apellido.setPlaceholderText("Apellido del cliente...")
 
         layout.addWidget(lbl_nombre, 0, 0)
         layout.addWidget(self.txt_cli_nombre, 0, 1)
-        layout.addWidget(lbl_apellido, 1, 0)
-        layout.addWidget(self.txt_cli_apellido, 1, 1)
-        layout.addWidget(lbl_tel, 2, 0)
-        layout.addWidget(self.txt_cli_tel, 2, 1)
-        layout.addWidget(lbl_email, 3, 0)
-        layout.addWidget(self.txt_cli_email, 3, 1)
-        layout.addWidget(btn_clear_client, 4, 0, 1, 2)
+        layout.addWidget(lbl_apellido, 0, 2)
+        layout.addWidget(self.txt_cli_apellido, 0, 3)
+
+        # Fila 1: Teléfono y Email
+        lbl_tel = QLabel("Teléfono:")
+        self.txt_cli_tel = QLineEdit()
+        self.txt_cli_tel.setPlaceholderText("Teléfono...")
+
+        lbl_email = QLabel("Email:")
+        self.txt_cli_email = QLineEdit()
+        self.txt_cli_email.setPlaceholderText("Email...")
+
+        layout.addWidget(lbl_tel, 1, 0)
+        layout.addWidget(self.txt_cli_tel, 1, 1)
+        layout.addWidget(lbl_email, 1, 2)
+        layout.addWidget(self.txt_cli_email, 1, 3)
+
+        # Fila 2: Botón para limpiar cliente
+        btn_clear_client = QPushButton("🧹 Limpiar datos del cliente")
+        btn_clear_client.setObjectName("btnSubtle")
+        btn_clear_client.clicked.connect(self._clear_client_fields)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        btn_row.addWidget(btn_clear_client)
+        layout.addLayout(btn_row, 2, 0, 1, 4)
 
         return box
 
     def _create_items_group(self) -> QGroupBox:
-        """Crea la sección de tabla de ítems con botones dinámicos para agregar/eliminar."""
+        """Crea la sección de tabla de ítems con altura amplia garantizada y botones de acción."""
         box = QGroupBox("Conceptos / Ítems del Presupuesto")
         layout = QVBoxLayout(box)
-        layout.setSpacing(10)
+        layout.setSpacing(6)
+        layout.setContentsMargins(10, 10, 10, 8)
 
-        # Tabla
+        # Tabla con altura mínima visible
         self.table_items = QTableWidget(0, 4)
+        self.table_items.setMinimumHeight(240)
         self.table_items.setHorizontalHeaderLabels([
-            "Descripción del Servicio / Ítem",
+            "Descripción del Servicio / Producto",
             "Cantidad",
             "Precio Unitario",
             "Subtotal",
@@ -194,14 +222,15 @@ class MainWindow(QMainWindow):
         self.table_items.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table_items.setSelectionMode(QAbstractItemView.SingleSelection)
         self.table_items.verticalHeader().setVisible(False)
-        layout.addWidget(self.table_items)
+        layout.addWidget(self.table_items, stretch=1)
 
-        # Botonera de ítems
+        # Botonera de ítems (claramente visible)
         btn_layout = QHBoxLayout()
-        btn_layout.setSpacing(10)
+        btn_layout.setSpacing(8)
 
         btn_add = QPushButton("＋ Agregar nuevo ítem")
         btn_add.setObjectName("btnSuccess")
+        btn_add.setCursor(Qt.PointingHandCursor)
         btn_add.clicked.connect(self._add_item_row)
 
         btn_del = QPushButton("✕ Eliminar ítem seleccionado")
@@ -216,18 +245,19 @@ class MainWindow(QMainWindow):
         btn_layout.addWidget(btn_clear)
         btn_layout.addStretch()
 
-        layout.addLayout(btn_layout)
+        layout.addLayout(btn_layout, stretch=0)
         return box
 
     def _create_options_group(self) -> QGroupBox:
-        """Crea la tarjeta de configuración de moneda, descuento e impuesto."""
-        box = QGroupBox("Parámetros Financieros y Validez")
+        """Crea la tarjeta compacta de configuración financiera en 2 filas."""
+        box = QGroupBox("Parámetros Financieros")
         layout = QGridLayout(box)
-        layout.setVerticalSpacing(8)
-        layout.setHorizontalSpacing(10)
+        layout.setVerticalSpacing(4)
+        layout.setHorizontalSpacing(8)
+        layout.setContentsMargins(8, 8, 8, 6)
 
-        # Moneda
-        lbl_cur = QLabel("Símbolo de Moneda:")
+        # Fila 0: Moneda y Validez
+        lbl_cur = QLabel("Moneda:")
         self.cmb_currency = QComboBox()
         self.cmb_currency.addItems(["$", "USD $", "ARS $", "EUR €", "CLP $", "MXN $", "COP $", "S/."])
         saved_curr = self.config_service.get_preference("currency_symbol", "$")
@@ -236,7 +266,18 @@ class MainWindow(QMainWindow):
             self.cmb_currency.setCurrentIndex(idx)
         self.cmb_currency.currentTextChanged.connect(self._on_currency_changed)
 
-        # Descuento %
+        lbl_val = QLabel("Validez:")
+        self.spn_validez = QSpinBox()
+        self.spn_validez.setRange(1, 365)
+        self.spn_validez.setValue(15)
+        self.spn_validez.setSuffix(" días")
+
+        layout.addWidget(lbl_cur, 0, 0)
+        layout.addWidget(self.cmb_currency, 0, 1)
+        layout.addWidget(lbl_val, 0, 2)
+        layout.addWidget(self.spn_validez, 0, 3)
+
+        # Fila 1: Descuento % e IVA / Impuesto
         lbl_disc = QLabel("Descuento (%):")
         self.spn_discount = QDoubleSpinBox()
         self.spn_discount.setRange(0.0, 100.0)
@@ -246,8 +287,7 @@ class MainWindow(QMainWindow):
         self.spn_discount.setValue(saved_disc)
         self.spn_discount.valueChanged.connect(self._recalculate_all)
 
-        # Impuesto / IVA %
-        self.chk_tax = QCheckBox("Aplicar Impuesto / IVA:")
+        self.chk_tax = QCheckBox("IVA / Impuesto:")
         saved_include_tax = self.config_service.get_preference("include_tax_by_default", True)
         self.chk_tax.setChecked(saved_include_tax)
         self.chk_tax.toggled.connect(self._on_tax_toggled)
@@ -261,73 +301,67 @@ class MainWindow(QMainWindow):
         self.spn_tax.valueChanged.connect(self._recalculate_all)
         self.spn_tax.setEnabled(saved_include_tax)
 
-        # Días de validez
-        lbl_val = QLabel("Validez del presupuesto:")
-        self.spn_validez = QSpinBox()
-        self.spn_validez.setRange(1, 365)
-        self.spn_validez.setValue(15)
-        self.spn_validez.setSuffix(" días")
-
-        layout.addWidget(lbl_cur, 0, 0)
-        layout.addWidget(self.cmb_currency, 0, 1)
         layout.addWidget(lbl_disc, 1, 0)
         layout.addWidget(self.spn_discount, 1, 1)
-        layout.addWidget(self.chk_tax, 2, 0)
-        layout.addWidget(self.spn_tax, 2, 1)
-        layout.addWidget(lbl_val, 3, 0)
-        layout.addWidget(self.spn_validez, 3, 1)
+        layout.addWidget(self.chk_tax, 1, 2)
+        layout.addWidget(self.spn_tax, 1, 3)
 
         return box
 
     def _create_summary_group(self) -> QGroupBox:
-        """Crea la tarjeta de visualización reactiva de totales calculados."""
-        box = QGroupBox("Resumen de Totales Calculados")
+        """Crea la tarjeta compacta de totales calculados en 2 filas."""
+        box = QGroupBox("Resumen de Totales")
         layout = QGridLayout(box)
-        layout.setVerticalSpacing(6)
-        layout.setHorizontalSpacing(14)
+        layout.setVerticalSpacing(4)
+        layout.setHorizontalSpacing(10)
+        layout.setContentsMargins(8, 8, 8, 6)
 
+        # Fila 0: Subtotal y Descuento
         lbl_s_title = QLabel("Subtotal Ítems:")
         lbl_s_title.setObjectName("lblSubtotal")
         self.lbl_subtotal_val = QLabel("$ 0,00")
         self.lbl_subtotal_val.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self.lbl_subtotal_val.setObjectName("lblSubtotal")
 
-        lbl_d_title = QLabel("Descuento aplicado:")
+        lbl_d_title = QLabel("Descuento:")
         self.lbl_discount_val = QLabel("- $ 0,00")
         self.lbl_discount_val.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
-        lbl_t_title = QLabel("Impuesto / IVA:")
+        layout.addWidget(lbl_s_title, 0, 0)
+        layout.addWidget(self.lbl_subtotal_val, 0, 1)
+        layout.addWidget(lbl_d_title, 0, 2)
+        layout.addWidget(self.lbl_discount_val, 0, 3)
+
+        # Fila 1: Impuesto y Total Final Destacado
+        lbl_t_title = QLabel("IVA / Imp.:")
         self.lbl_tax_val = QLabel("+ $ 0,00")
         self.lbl_tax_val.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
-        lbl_tot_title = QLabel("TOTAL FINAL:")
+        lbl_tot_title = QLabel("TOTAL:")
         lbl_tot_title.setObjectName("lblTotalFinal")
         self.lbl_total_final = QLabel("$ 0,00")
         self.lbl_total_final.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self.lbl_total_final.setObjectName("lblTotalFinal")
 
-        layout.addWidget(lbl_s_title, 0, 0)
-        layout.addWidget(self.lbl_subtotal_val, 0, 1)
-        layout.addWidget(lbl_d_title, 1, 0)
-        layout.addWidget(self.lbl_discount_val, 1, 1)
-        layout.addWidget(lbl_t_title, 2, 0)
-        layout.addWidget(self.lbl_tax_val, 2, 1)
-        layout.addWidget(lbl_tot_title, 3, 0)
-        layout.addWidget(self.lbl_total_final, 3, 1)
+        layout.addWidget(lbl_t_title, 1, 0)
+        layout.addWidget(self.lbl_tax_val, 1, 1)
+        layout.addWidget(lbl_tot_title, 1, 2)
+        layout.addWidget(self.lbl_total_final, 1, 3)
 
         return box
 
     def _create_actions_bar(self) -> QHBoxLayout:
         """Crea los botones de acción principal."""
         layout = QHBoxLayout()
-        layout.setSpacing(12)
+        layout.setSpacing(10)
+        layout.setContentsMargins(0, 4, 0, 4)
 
-        btn_folder = QPushButton("📁 Abrir Carpeta de Salidas")
-        btn_folder.setToolTip("Abre el directorio donde se guardan los archivos PDF generados")
+        btn_folder = QPushButton("📁 Carpeta de Salidas")
+        btn_folder.setToolTip("Abre la carpeta donde se guardan los PDFs")
         btn_folder.clicked.connect(self._open_outputs_directory)
 
         btn_new = QPushButton("🔄 Nuevo Presupuesto")
-        btn_new.setToolTip("Limpia los campos del cliente y la tabla para iniciar una nueva cotización")
+        btn_new.setToolTip("Limpia los campos del cliente e ítems para iniciar otra cotización")
         btn_new.clicked.connect(self._reset_budget_form)
 
         btn_generate = QPushButton("📄 GENERAR PRESUPUESTO EN PDF")
@@ -362,7 +396,6 @@ class MainWindow(QMainWindow):
             titulo_profesional=self.txt_prof_titulo.text().strip() or "Servicios Profesionales",
         )
         if self.config_service.save_profesional(prof):
-            # Guardar también preferencias seleccionadas
             self.config_service.set_preference("currency_symbol", self.cmb_currency.currentText())
             self.config_service.set_preference("default_tax_rate", self.spn_tax.value())
             self.config_service.set_preference("default_discount_rate", self.spn_discount.value())
@@ -557,7 +590,6 @@ class MainWindow(QMainWindow):
 
     def _generate_pdf_budget(self):
         """Valida las entradas, emite el PDF y ofrece abrir el archivo o la carpeta."""
-        # 1. Validaciones mínimas
         cliente_nombre = self.txt_cli_nombre.text().strip()
         cliente_apellido = self.txt_cli_apellido.text().strip()
         if not cliente_nombre and not cliente_apellido:
@@ -578,7 +610,6 @@ class MainWindow(QMainWindow):
             )
             return
 
-        # Verificar que los ítems tengan descripción
         items_sin_desc = [idx + 1 for idx, it in enumerate(items) if not it.descripcion.strip()]
         if items_sin_desc:
             QMessageBox.warning(
@@ -588,12 +619,10 @@ class MainWindow(QMainWindow):
             )
             return
 
-        # 2. Generación del documento
         try:
             presupuesto = self._build_presupuesto_model()
             pdf_path = self.pdf_service.generate(presupuesto)
 
-            # 3. Diálogo de confirmación amigable
             msg_box = QMessageBox(self)
             msg_box.setWindowTitle("¡Presupuesto Generado con Éxito!")
             msg_box.setText(f"El presupuesto en PDF se ha generado correctamente:\n\n{Path(pdf_path).name}")
