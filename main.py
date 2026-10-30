@@ -17,11 +17,7 @@ from src.utils.paths import get_app_icon_path
 
 def main():
     """Inicializa y ejecuta la aplicación de escritorio FeeReport Lite."""
-    # Configuración de renderizado de alta densidad (High DPI)
-    if hasattr(Qt, "AA_EnableHighDpiScaling"):
-        QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-    if hasattr(Qt, "AA_UseHighDpiPixmaps"):
-        QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+    # Qt 6 gestiona High DPI de manera nativa y automática por defecto
 
     app = QApplication(sys.argv)
     app.setApplicationName("FeeReport Lite")
