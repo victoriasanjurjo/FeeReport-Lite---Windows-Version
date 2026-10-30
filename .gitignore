@@ -1,0 +1,32 @@
+# Entornos virtuales
+.venv/
+env/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.spec
+
+# Compilación y distribución
+build/
+dist/
+*.egg-info/
+
+# Variables de entorno y configs privadas
+.env
+.env.*
+!.env.example
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Salidas generadas temporalmente (manteniendo el directorio)
+outputs/*.pdf
+outputs/*.png
+!outputs/.gitkeep

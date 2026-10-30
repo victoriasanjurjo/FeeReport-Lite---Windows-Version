@@ -1,0 +1,17 @@
+{
+  "professional": {
+    "nombre": "",
+    "apellido": "",
+    "telefono": "",
+    "email": ""
+  },
+  "preferences": {
+    "currency_symbol": "$",
+    "currency_code": "ARS",
+    "default_tax_rate": 21.0,
+    "default_discount_rate": 0.0,
+    "include_tax_by_default": true,
+    "company_or_title": "Servicios Profesionales",
+    "pdf_footer_note": "Presupuesto válido por 15 días hábiles a partir de la fecha de emisión."
+  }
+}
